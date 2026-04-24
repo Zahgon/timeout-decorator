@@ -64,33 +64,7 @@ def timeout(seconds=None, use_signals=True, timeout_exception=TimeoutError, exce
     """
     def decorate(function):
 
-        if use_signals:
-            def handler(signum, frame):
-                _raise_exception(timeout_exception, exception_message)
-
-            @wraps(function)
-            def new_function(*args, **kwargs):
-                new_seconds = kwargs.pop('timeout', seconds)
-                if new_seconds:
-                    old = signal.signal(signal.SIGALRM, handler)
-                    signal.setitimer(signal.ITIMER_REAL, new_seconds)
-
-                if not seconds:
-                    return function(*args, **kwargs)
-
-                try:
-                    return function(*args, **kwargs)
-                finally:
-                    if new_seconds:
-                        signal.setitimer(signal.ITIMER_REAL, 0)
-                        signal.signal(signal.SIGALRM, old)
-            return new_function
-        else:
-            @wraps(function)
-            def new_function(*args, **kwargs):
-                timeout_wrapper = _Timeout(function, timeout_exception, exception_message, seconds)
-                return timeout_wrapper(*args, **kwargs)
-            return new_function
+        pass
 
     return decorate
 
@@ -103,10 +77,7 @@ def _target(queue, function, *args, **kwargs):
     returns the function's output by way of a queue. If an exception gets
     raised, it is returned to _Timeout to be raised by the value property.
     """
-    try:
-        queue.put((True, function(*args, **kwargs)))
-    except:
-        queue.put((False, sys.exc_info()[1]))
+    pass
 
 
 class _Timeout(object):
@@ -153,23 +124,14 @@ class _Timeout(object):
 
     def cancel(self):
         """Terminate any possible execution of the embedded function."""
-        if self.__process.is_alive():
-            self.__process.terminate()
-
-        _raise_exception(self.__timeout_exception, self.__exception_message)
+        pass
 
     @property
     def ready(self):
         """Read-only property indicating status of "value" property."""
-        if self.__limit and self.__timeout < time.time():
-            self.cancel()
-        return self.__queue.full() and not self.__queue.empty()
+        pass
 
     @property
     def value(self):
         """Read-only property containing data returned from function."""
-        if self.ready is True:
-            flag, load = self.__queue.get()
-            if flag:
-                return load
-            raise load
+        pass
